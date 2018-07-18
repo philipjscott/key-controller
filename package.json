@@ -1,0 +1,16 @@
+{
+  "name": "key-controller",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:ScottyFillups/key-controller.git",
+  "author": "Philip Scott <pscott@zeptohost.com>",
+  "license": "MIT",
+  "scripts": {
+    "functional": "parcel ./test/index.html --open"
+  },
+  "devDependencies": {
+    "keycode": "^2.2.0",
+    "parcel-bundler": "^1.9.6",
+    "standard": "^11.0.1"
+  }
+}
