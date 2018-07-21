@@ -4,6 +4,7 @@
 
 import Controller from '../lib/controller'
 import chai, { expect } from 'chai'
+import keycode from 'keycode'
 import dirtyChai from 'dirty-chai'
 import sinon from 'sinon'
 import { keydownPress, keyupPress, keyupShiftPress } from './keypress'
@@ -13,9 +14,9 @@ chai.use(dirtyChai)
 let myModel
 let virtuals
 let controls
+let controller
 
 describe('controller maps commands to keyboard codes', () => {
-  // have a beforeEach spie
   beforeEach(() => {
     myModel = {
       a: 'init'
@@ -47,12 +48,19 @@ describe('controller maps commands to keyboard codes', () => {
       dec: 'a',
       reset: 's'
     }
+
+    controller = new Controller(myModel, virtuals)
+    controller.register(controls)
+
+    // For some reason, Controller does not properly bind to the DOM in test env
+    // Manually attaching the handlers instead
+    document.addEventListener('keydown', controller._handlers['keydown'])
+    document.addEventListener('keyup', controller._handlers['keyup'])
   })
 
-  /* afterEach(() => {
+  afterEach(() => {
     controller.unbind()
   })
-  */
 
   describe('headless chrome DOM', () => {
     it('should be able to register an event and call the handler', () => {
@@ -70,23 +78,28 @@ describe('controller maps commands to keyboard codes', () => {
   })
 
   it.only('should register events using document.addEventListener', () => {
-    const documentSpy = sinon.spy(document, 'addEventListener')
-
+    /* const documentAddEventSpy = sinon.spy(document, 'addEventListener')
+    const documentRemoveEventSpy = sinon.spy(document, 'removeEventListener')
     const controller = new Controller(myModel, virtuals)
+
     controller.register(controls)
+    expect(documentAddEventSpy.calledWith('keyup', controller._handlers['keyup']))
+    expect(documentAddEventSpy.calledWith('keydown', controller._handlers['keydown']))
+    expect(documentRemoveEventSpy.called).to.be.false()
+    */
 
-    const keyupHandlerSpy = sinon.spy(controller._handlers['keyup'].bind(controller))
+    const documentDispatchSpy = sinon.spy(document, 'dispatchEvent')
+    // const keyupHandlerSpy = sinon.spy(controller._handlers, 'keydown')
 
-    expect(documentSpy.calledWith('keyup', controller._handlers['keyup']))
-    expect(documentSpy.calledWith('keydown', controller._handlers['keydown']))
-    // expect(keyupHandlerSpy.calledWith(myModel)).to.be.true()
+    keydownPress('w')
 
-    return keyupPress('w').then(() => {
-      controller._handlers['keyup'](new KeyboardEvent('keyup', { keyCode: 87 }))
-      console.log(myModel)
-      expect(keyupHandlerSpy.called).to.be.true()
-      // expect(myModel.a).to.equal('keyup inc')
-    })
+    const keyboardEvent = documentDispatchSpy.getCall(0).args[0]
+
+    expect(documentDispatchSpy.calledOnce).to.be.true()
+    expect(keyboardEvent.keyCode).to.equal(keycode('w'))
+    expect(keyboardEvent.type).to.equal('keydown')
+    expect(myModel.a).to.equal('keydown inc')
+    // expect(keyupHandlerSpy.called).to.be.true()
   })
 
   it('should call the appropriate handler', () => {

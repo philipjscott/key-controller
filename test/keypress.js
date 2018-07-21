@@ -4,28 +4,28 @@
 
 import keycode from 'keycode'
 
-function keyPress (key, eventType, options) {
-  const wait = 500
+function keyPress (key, eventType, options = {}) {
+  // const wait = 500
   const eventInit = Object.assign({}, { keyCode: keycode(key) }, options)
   const event = new KeyboardEvent(eventType, eventInit)
 
   document.dispatchEvent(event)
 
-  return new Promise((resolve, reject) => {
+  /* return new Promise((resolve, reject) => {
     setTimeout(resolve, wait)
-  })
+  }) */
 }
 
 function keydownPress (key) {
-  return keyPress(key, 'keydown')
+  keyPress(key, 'keydown')
 }
 
 function keyupPress (key) {
-  return keyPress(key, 'keyup')
+  keyPress(key, 'keyup')
 }
 
 function keyupShiftPress (key) {
-  return keyPress(key, 'keyup', { shiftKey: true })
+  keyPress(key, 'keyup', { shiftKey: true })
 }
 
 export {
