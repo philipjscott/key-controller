@@ -1,36 +1,36 @@
+/* global KeyboardEvent */
+
 'use strict'
 
 import keycode from 'keycode'
 
-function keyPress (key, eventType, fn) {
-  const event = document.createEvent('KeyboardEvent')
-
-  event.key = keycode(key)
-  event.initEvent(eventType)
-
-  if (fn) {
-    fn(event)
-  }
+function keyPress (key, eventType, options) {
+  const wait = 500
+  const eventInit = Object.assign({}, { keyCode: keycode(key) }, options)
+  const event = new KeyboardEvent(eventType, eventInit)
 
   document.dispatchEvent(event)
-}
 
-function keydownPress (key) {
-  keyPress(key, 'keydown')
-}
-
-function keyupPress (key) {
-  keyPress(key, 'keyup')
-}
-
-function keydownPressShift (key) {
-  keyPress(key, 'keydown', (event) => {
-    event.shiftKey = true
+  return new Promise((resolve, reject) => {
+    console.log('done waiting!')
+    setTimeout(resolve, wait)
   })
 }
 
+function keydownPress (key) {
+  return keyPress(key, 'keydown')
+}
+
+function keyupPress (key) {
+  return keyPress(key, 'keyup')
+}
+
+function keyupShiftPress (key) {
+  return keyPress(key, 'keyup', { shiftKey: true })
+}
+
 export {
-  keydownPressShift,
+  keyupShiftPress,
   keydownPress,
   keyupPress
 }

@@ -4,21 +4,22 @@
 
 import Controller from '../lib/controller'
 import { expect } from 'chai'
-import { keypressDown, keypressUp, keypressUpShift } from './keypress'
+import { keydownPress, keyupPress, keyupShiftPress } from './keypress'
 
-let model
+let myModel
 let commands
 let controls
 let controller
 
 describe('controller maps commands to keyboard codes', () => {
   beforeEach(() => {
-    model = {
+    myModel = {
       a: 'init'
     }
     commands = {
       keyup: {
         inc (model, e) {
+          console.log('called')
           if (!e.shiftKey) {
             model.a = 'keyup inc'
           } else {
@@ -43,7 +44,7 @@ describe('controller maps commands to keyboard codes', () => {
       dec: 'a',
       reset: 's'
     }
-    controller = new Controller(model, commands)
+    controller = new Controller(myModel, commands)
     controller.register(controls)
   })
 
@@ -51,21 +52,42 @@ describe('controller maps commands to keyboard codes', () => {
     controller.unbind()
   })
 
-  it('should call the appropriate handler', () => {
-    keypressUp('w')
-    expect(model.a).to.equal('keyup inc')
+  describe('headless chrome DOM', () => {
+    it('should be able to register an event and call the handler', () => {
+      let model = 0
+      const handler = () => {
+        model = 1
+      }
+      const eventType = 'keyup'
 
-    keypressUpShift('w')
-    expect(model.a).to.equal('keyup inc shift')
+      document.addEventListener(eventType, handler)
+      keyupPress('w')
+      expect(model).to.equal(1)
+      document.removeEventListener(eventType, handler)
+    })
+  })
 
-    keypressDown('w')
-    expect(model.a).to.equal('keydown inc')
+  it.only('should call the appropriate handler', async () => {
+    keyupPress('w').then(() => {
+      // possible race issue: keyup calls the handler, but handler may not finish in time
+      // make keyPress by an async function; await
+      console.log('done', myModel.a)
+      expect(myModel.a).to.equal('keyup inc')
+    })
 
-    keypressDown('a')
-    expect(model.a).to.equal('keydown dec')
+      /*
+    keyupShiftPress('w')
+    expect(myModel.a).to.equal('keyup inc shift')
 
-    keypressDown('s')
-    expect(model.a).to.equal('keydown reset')
+    keydownPress('w')
+    expect(myModel.a).to.equal('keydown inc')
+
+    keydownPress('a')
+    expect(myModel.a).to.equal('keydown dec')
+
+    keydownPress('s')
+    expect(myModel.a).to.equal('keydown reset')
+      */
   })
 
   it('should overwrite old controls when passed new controls', () => {
@@ -75,44 +97,44 @@ describe('controller maps commands to keyboard codes', () => {
       reset: 'd'
     })
 
-    keypressUp('w')
-    expect(model.a).to.equal('init')
+    keyupPress('w')
+    expect(myModel.a).to.equal('init')
 
-    keypressUpShift('w')
-    expect(model.a).to.equal('init')
+    keyupShiftPress('w')
+    expect(myModel.a).to.equal('init')
 
-    keypressDown('w')
-    expect(model.a).to.equal('init')
+    keydownPress('w')
+    expect(myModel.a).to.equal('init')
 
-    keypressDown('a')
-    expect(model.a).to.equal('init')
+    keydownPress('a')
+    expect(myModel.a).to.equal('init')
 
-    keypressDown('s')
-    expect(model.a).to.equal('init')
+    keydownPress('s')
+    expect(myModel.a).to.equal('init')
 
-    keypressUp('q')
-    expect(model.a).to.equal('keyup inc')
+    keyupPress('q')
+    expect(myModel.a).to.equal('keyup inc')
 
-    keypressUpShift('q')
-    expect(model.a).to.equal('keyup inc shift')
+    keyupShiftPress('q')
+    expect(myModel.a).to.equal('keyup inc shift')
 
-    keypressDown('q')
-    expect(model.a).to.equal('keydown inc')
+    keydownPress('q')
+    expect(myModel.a).to.equal('keydown inc')
 
-    keypressDown('e')
-    expect(model.a).to.equal('keydown dec')
+    keydownPress('e')
+    expect(myModel.a).to.equal('keydown dec')
 
-    keypressDown('d')
-    expect(model.a).to.equal('keydown reset')
+    keydownPress('d')
+    expect(myModel.a).to.equal('keydown reset')
   })
 
   it('should be able to bind and unbind the controller', () => {
     controller.unbind()
-    keypressUp('w')
-    expect(model.a).to.equal('init')
+    keyupPress('w')
+    expect(myModel.a).to.equal('init')
 
     controller.bind()
-    keypressUp('w')
-    expect(model.a).to.equal('keyup inc')
+    keyupPress('w')
+    expect(myModel.a).to.equal('keyup inc')
   })
 })
