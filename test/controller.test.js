@@ -67,8 +67,8 @@ describe('controller maps commands to keyboard codes', () => {
     })
   })
 
-  it.only('should call the appropriate handler', async () => {
-    keyupPress('w').then(() => {
+  it.only('should call the appropriate handler', () => {
+    return keyupPress('w').then(() => {
       // possible race issue: keyup calls the handler, but handler may not finish in time
       // make keyPress by an async function; await
       console.log('done', myModel.a)
