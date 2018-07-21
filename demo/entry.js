@@ -7,8 +7,7 @@ const model = {
 const controls = {
   inc: '1',
   dec: '2',
-  reset: '3',
-  print: '4'
+  reset: '3'
 }
 
 const controller = new Controller(model, virtuals)

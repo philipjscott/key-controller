@@ -13,7 +13,7 @@ const reset = {
     model.num = 0
   }
 }
-const print = {
+const _ = {
   keydown (model) {
     console.log(model)
   }
@@ -23,5 +23,5 @@ export {
   inc,
   dec,
   reset,
-  print
+  _
 }

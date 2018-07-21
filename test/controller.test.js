@@ -34,9 +34,15 @@ function removeEvents () {
 describe('controller maps commands to keyboard codes', () => {
   beforeEach(() => {
     myModel = {
-      a: 'init'
+      a: 'init',
+      calls: 0
     }
     virtuals = {
+      _: {
+        keydown (model) {
+          model.calls += 1
+        }
+      },
       inc: {
         keyup (model, e) {
           if (!e.shiftKey) {
@@ -128,6 +134,25 @@ describe('controller maps commands to keyboard codes', () => {
 
     keydownPress('s')
     expect(myModel.a).to.equal('keydown reset')
+  })
+
+  it('should call the wildcard handler when any key is pressed', () => {
+    expect(myModel.calls).to.equal(0)
+
+    keydownPress('n')
+    expect(myModel.calls).to.equal(1)
+
+    keydownPress('w')
+    expect(myModel.calls).to.equal(2)
+
+    keydownPress('5')
+    expect(myModel.calls).to.equal(3)
+
+    keydownPress('k')
+    expect(myModel.calls).to.equal(4)
+
+    keydownPress('space')
+    expect(myModel.calls).to.equal(5)
   })
 
   it('should overwrite old controls when passed new controls', () => {
