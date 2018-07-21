@@ -16,29 +16,46 @@ let virtuals
 let controls
 let controller
 
+let documentAddEventSpy
+let documentRemoveEventSpy
+
+// For some reason, Controller does not properly bind to the DOM in test env
+// For now we'll manually attach the events instead, and try to find a fix in the future
+function addEvents () {
+  document.addEventListener('keydown', controller._handlers['keydown'])
+  document.addEventListener('keyup', controller._handlers['keyup'])
+}
+
+function removeEvents () {
+  document.removeEventListener('keydown', controller._handlers['keydown'])
+  document.removeEventListener('keyup', controller._handlers['keyup'])
+}
+
 describe('controller maps commands to keyboard codes', () => {
   beforeEach(() => {
     myModel = {
       a: 'init'
     }
     virtuals = {
-      keyup: {
-        inc (model, e) {
+      inc: {
+        keyup (model, e) {
           if (!e.shiftKey) {
             model.a = 'keyup inc'
           } else {
             model.a = 'keyup inc shift'
           }
+        },
+        keydown (model) {
+          model.a = 'keydown inc'
         }
       },
-      keydown: {
-        inc (model) {
-          model.a = 'keydown inc'
-        },
-        dec (model) {
+      dec: {
+        keydown (model) {
           model.a = 'keydown dec'
-        },
-        reset (model) {
+        }
+      },
+      reset: {
+        keydown (model) {
           model.a = 'keydown reset'
         }
       }
@@ -52,14 +69,16 @@ describe('controller maps commands to keyboard codes', () => {
     controller = new Controller(myModel, virtuals)
     controller.register(controls)
 
-    // For some reason, Controller does not properly bind to the DOM in test env
-    // Manually attaching the handlers instead
-    document.addEventListener('keydown', controller._handlers['keydown'])
-    document.addEventListener('keyup', controller._handlers['keyup'])
+    documentAddEventSpy = sinon.spy(document, 'addEventListener')
+    documentRemoveEventSpy = sinon.spy(document, 'removeEventListener')
+
+    addEvents()
   })
 
   afterEach(() => {
-    controller.unbind()
+    removeEvents()
+    documentAddEventSpy.restore()
+    documentRemoveEventSpy.restore()
   })
 
   describe('headless chrome DOM', () => {
@@ -77,19 +96,12 @@ describe('controller maps commands to keyboard codes', () => {
     })
   })
 
-  it.only('should register events using document.addEventListener', () => {
-    /* const documentAddEventSpy = sinon.spy(document, 'addEventListener')
-    const documentRemoveEventSpy = sinon.spy(document, 'removeEventListener')
-    const controller = new Controller(myModel, virtuals)
+  it('should register events using document.addEventListener', () => {
+    const documentDispatchSpy = sinon.spy(document, 'dispatchEvent')
 
-    controller.register(controls)
     expect(documentAddEventSpy.calledWith('keyup', controller._handlers['keyup']))
     expect(documentAddEventSpy.calledWith('keydown', controller._handlers['keydown']))
     expect(documentRemoveEventSpy.called).to.be.false()
-    */
-
-    const documentDispatchSpy = sinon.spy(document, 'dispatchEvent')
-    // const keyupHandlerSpy = sinon.spy(controller._handlers, 'keydown')
 
     keydownPress('w')
 
@@ -99,26 +111,12 @@ describe('controller maps commands to keyboard codes', () => {
     expect(keyboardEvent.keyCode).to.equal(keycode('w'))
     expect(keyboardEvent.type).to.equal('keydown')
     expect(myModel.a).to.equal('keydown inc')
-    // expect(keyupHandlerSpy.called).to.be.true()
   })
 
   it('should call the appropriate handler', () => {
-    const controller = new Controller(myModel, virtuals)
-    controller.register(controls)
-    console.log('model: ', controller._model)
-    console.log('virtuals: ', controller._virtuals)
-    console.log('handlers: ', controller._handlers)
-    // for some reason document.addEventListener isn't proccing in lib
-    // problem: below line shouldn't be needed!
-    // document.addEventListener('keyup', controller._handlers['keyup'])
-    return keyupPress('w').then(() => {
-      // possible race issue: keyup calls the handler, but handler may not finish in time
-      // make keyPress by an async function; await
-      console.log('done', myModel.a)
-      expect(myModel.a).to.equal('keyup inc')
-    })
+    keyupPress('w')
+    expect(myModel.a).to.equal('keyup inc')
 
-      /*
     keyupShiftPress('w')
     expect(myModel.a).to.equal('keyup inc shift')
 
@@ -130,15 +128,18 @@ describe('controller maps commands to keyboard codes', () => {
 
     keydownPress('s')
     expect(myModel.a).to.equal('keydown reset')
-      */
   })
 
   it('should overwrite old controls when passed new controls', () => {
+    removeEvents()
+
     controller.register({
       inc: 'q',
       dec: 'e',
       reset: 'd'
     })
+
+    addEvents()
 
     keyupPress('w')
     expect(myModel.a).to.equal('init')
@@ -173,10 +174,12 @@ describe('controller maps commands to keyboard codes', () => {
 
   it('should be able to bind and unbind the controller', () => {
     controller.unbind()
+    removeEvents()
     keyupPress('w')
     expect(myModel.a).to.equal('init')
 
     controller.bind()
+    addEvents()
     keyupPress('w')
     expect(myModel.a).to.equal('keyup inc')
   })

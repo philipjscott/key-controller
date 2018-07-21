@@ -1,23 +1,8 @@
 import Controller from '../lib'
+import * as virtuals from './virtuals'
 
 const model = {
   num: 0
-}
-const virtuals = {
-  keydown: {
-    inc (model) {
-      model.num += 1
-    },
-    dec (model) {
-      model.num -= 1
-    },
-    reset (model) {
-      model.num = 0
-    },
-    print (model) {
-      console.log(model)
-    }
-  }
 }
 const controls = {
   inc: '1',
