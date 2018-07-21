@@ -12,7 +12,6 @@ function keyPress (key, eventType, options) {
   document.dispatchEvent(event)
 
   return new Promise((resolve, reject) => {
-    console.log('done waiting!')
     setTimeout(resolve, wait)
   })
 }
