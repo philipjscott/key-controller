@@ -68,13 +68,19 @@ describe('controller maps commands to keyboard codes', () => {
         keydown (model) {
           model.a = 'keydown reset'
         }
+      },
+      multi: {
+        keydown (model) {
+          model.a = 'keydown multi'
+        }
       }
     }
     controls = {
       inc: 'w',
       dec: 'a',
       reset: 's',
-      caps: 'A'
+      caps: 'A',
+      multi: ['H', 'g', 'G']
     }
 
     controller = new Controller(myModel, virtuals)
@@ -93,7 +99,7 @@ describe('controller maps commands to keyboard codes', () => {
   })
 
   describe('headless chrome DOM', () => {
-    it('should be able to register an event and call the handler', () => {
+    it('registers an event and call the handler', () => {
       let model = 0
       const handler = () => {
         model = 1
@@ -107,7 +113,7 @@ describe('controller maps commands to keyboard codes', () => {
     })
   })
 
-  it('should register events using document.addEventListener', () => {
+  it('registers events using document.addEventListener', () => {
     const documentDispatchSpy = sinon.spy(document, 'dispatchEvent')
 
     expect(documentAddEventSpy.calledWith('keyup', controller._handlers['keyup']))
@@ -124,7 +130,7 @@ describe('controller maps commands to keyboard codes', () => {
     expect(myModel.a).to.equal('keydown inc')
   })
 
-  it('should call the appropriate handler', () => {
+  it('calls the appropriate handler', () => {
     keyupPress('w')
     expect(myModel.a).to.equal('keyup inc')
 
@@ -144,7 +150,27 @@ describe('controller maps commands to keyboard codes', () => {
     expect(myModel.a).to.equal('keydown caps')
   })
 
-  it('should call the wildcard handler when any key is pressed', () => {
+  it('handles multiple keys binded to a single virtual key', () => {
+    keyupPress('w')
+    expect(myModel.a).to.equal('keyup inc')
+
+    keydownPress('H')
+    expect(myModel.a).to.equal('keydown multi')
+
+    keydownPress('w')
+    expect(myModel.a).to.equal('keydown inc')
+
+    keydownPress('G')
+    expect(myModel.a).to.equal('keydown multi')
+
+    keydownPress('s')
+    expect(myModel.a).to.equal('keydown reset')
+
+    keydownPress('g')
+    expect(myModel.a).to.equal('keydown multi')
+  })
+
+  it('calls the wildcard handler when any key is pressed', () => {
     expect(myModel.calls).to.equal(0)
 
     keydownPress('n')
@@ -163,7 +189,7 @@ describe('controller maps commands to keyboard codes', () => {
     expect(myModel.calls).to.equal(5)
   })
 
-  it('should overwrite old controls when passed new controls', () => {
+  it('overwrites old controls when passed new controls', () => {
     removeEvents()
 
     controller.register({
@@ -205,7 +231,7 @@ describe('controller maps commands to keyboard codes', () => {
     expect(myModel.a).to.equal('keydown reset')
   })
 
-  it('should be able to bind and unbind the controller', () => {
+  it('bind and unbind the controller', () => {
     controller.unbind()
     removeEvents()
     keyupPress('w')
