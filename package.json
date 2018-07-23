@@ -29,12 +29,10 @@
     "mocha": "^5.2.0",
     "parcel-bundler": "^1.9.6",
     "puppeteer": "^1.6.0",
+    "semantic-release": "^15.8.1",
     "sinon": "^6.1.4",
     "standard": "^11.0.1",
-    "semantic-release": "^15.8.1",
     "travis-deploy-once": "^5.0.1"
   },
-  "dependencies": {
-    "keycode": "^2.2.0"
-  }
+  "dependencies": {}
 }

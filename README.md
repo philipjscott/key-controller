@@ -53,4 +53,4 @@ controller.register(controls) // map keyboard controls to "virtual keys"
 
 key-controller currently only supports projects that transpile ES6. We plan to make a UMD build soon :smiley:
 
-key-controller uses [keycode](https://www.npmjs.com/package/keycode) for mapping characters to Keyboard event keycodes.
+key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for mapping controls to virtual keys.
