@@ -4,7 +4,6 @@
 
 import Controller from '../lib/controller'
 import chai, { expect } from 'chai'
-import keycode from 'keycode'
 import dirtyChai from 'dirty-chai'
 import sinon from 'sinon'
 import { keydownPress, keyupPress, keyupShiftPress } from './keypress'
@@ -43,6 +42,11 @@ describe('controller maps commands to keyboard codes', () => {
           model.calls += 1
         }
       },
+      caps: {
+        keydown (model) {
+          model.a = 'keydown caps'
+        }
+      },
       inc: {
         keyup (model, e) {
           if (!e.shiftKey) {
@@ -69,7 +73,8 @@ describe('controller maps commands to keyboard codes', () => {
     controls = {
       inc: 'w',
       dec: 'a',
-      reset: 's'
+      reset: 's',
+      caps: 'A'
     }
 
     controller = new Controller(myModel, virtuals)
@@ -114,7 +119,7 @@ describe('controller maps commands to keyboard codes', () => {
     const keyboardEvent = documentDispatchSpy.getCall(0).args[0]
 
     expect(documentDispatchSpy.calledOnce).to.be.true()
-    expect(keyboardEvent.keyCode).to.equal(keycode('w'))
+    expect(keyboardEvent.key).to.equal('w')
     expect(keyboardEvent.type).to.equal('keydown')
     expect(myModel.a).to.equal('keydown inc')
   })
@@ -134,6 +139,9 @@ describe('controller maps commands to keyboard codes', () => {
 
     keydownPress('s')
     expect(myModel.a).to.equal('keydown reset')
+
+    keydownPress('A')
+    expect(myModel.a).to.equal('keydown caps')
   })
 
   it('should call the wildcard handler when any key is pressed', () => {
