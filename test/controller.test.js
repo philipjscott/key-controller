@@ -68,13 +68,19 @@ describe('controller maps commands to keyboard codes', () => {
         keydown (model) {
           model.a = 'keydown reset'
         }
+      },
+      mod: {
+        keydown (model) {
+          model.a = 'keydown ctrl+alt++'
+        }
       }
     }
     controls = {
       inc: 'w',
       dec: 'a',
       reset: 's',
-      caps: 'A'
+      caps: 'A',
+      mod: 'ctrl+alt++'
     }
 
     controller = new Controller(myModel, virtuals)
