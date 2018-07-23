@@ -2,6 +2,10 @@
 
 key-controller is a library that simplifies registering handlers for `keydown` and `keyup` events.
 
+key-controller currently only supports projects that transpile ES6. We plan to make a UMD build soon :smiley:
+
+key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for mapping controls to virtual keys.
+
 ## Installation
 
 ```
@@ -18,14 +22,15 @@ npm install key-controller --save-dev
 import Controller from 'key-controller'
 
 const myModel = {
-  num: 0
+  num: 0,
+  x: 0,
+  y: 0,
+  isDancing: false
 }
 const virtuals = {
   inc: {
-    keydown (model, e) { // e is the Keyboard Event; you can manually check if the shift key is pressed
-      if (e.shiftKey) {  // In this case, we're checking if '+' is pressed, not '='
-        model.num += 1
-      }
+    keydown (model) {
+      model.num += 1
     }
   },
   dec: {
@@ -33,15 +38,47 @@ const virtuals = {
       model.num -= 1
     }
   },
-  _: { // the "_" virtual key is special; it's triggered by any keypress and is used primarily for debugging
+  moveLeft: {
+    keydown (model) {
+      model.x -= 1
+    }
+  },
+  moveRight: {
+    keydown (model) {
+      model.x += 1
+    }
+  },
+  moveUp: {
+    keydown (model) {
+      model.y += 1
+    }
+  },
+  moveDown: {
+    keydown (model) {
+      model.y -= 1
+    }
+  },
+  toggleDancing: {
+    keydown (model) {
+      model.isDancing = !model.isDancing
+    }
+  },
+  // the "_" virtual key is special;
+  // it's triggered by any keypress and is used primarily for debugging
+  _: { 
     keydown (model) {
       console.log(model)
     }
   }
 }
 const controls = {
-  inc: '=', // at the moment, key-controller does not support case-sensitive keys; must ae lower-case
-  dec: '-'
+  inc: '+',
+  dec: '-',
+  moveLeft: ['ArrowLeft', 'a'],
+  moveRight: ['ArrowRight', 'd'],
+  moveUp: ['ArrowUp', 'w'],
+  moveDown: ['ArrowDown', 's'],
+  toggleDance: 'alt+d'
 }
 const controller = new Controller(myModel, virtuals)
 
@@ -50,7 +87,3 @@ controller.register(controls) // map keyboard controls to "virtual keys"
 // controller.register( ... ) can be called with new controls any time;
 // this overwrites the old controls
 ```
-
-key-controller currently only supports projects that transpile ES6. We plan to make a UMD build soon :smiley:
-
-key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for mapping controls to virtual keys.
