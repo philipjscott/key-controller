@@ -6,7 +6,13 @@ import Controller from '../lib/controller'
 import chai, { expect } from 'chai'
 import dirtyChai from 'dirty-chai'
 import sinon from 'sinon'
-import { keydownPress, keyupPress, keyupShiftPress } from './keypress'
+import {
+  keydownPress,
+  keyupPress,
+  keydownAltPress,
+  keydownAltCtrlPress,
+  keyupShiftPress
+} from './keypress'
 
 chai.use(dirtyChai)
 
@@ -69,9 +75,19 @@ describe('controller maps commands to keyboard codes', () => {
           model.a = 'keydown reset'
         }
       },
+      mod: {
+        keydown (model) {
+          model.a = 'keydown ctrl+alt++'
+        }
+      },
       multi: {
         keydown (model) {
           model.a = 'keydown multi'
+        }
+      },
+      multimod: {
+        keydown (model) {
+          model.a = 'keydown multimod'
         }
       }
     }
@@ -80,7 +96,9 @@ describe('controller maps commands to keyboard codes', () => {
       dec: 'a',
       reset: 's',
       caps: 'A',
-      multi: ['H', 'g', 'G']
+      mod: 'ctrl+alt++',
+      multi: ['H', 'g', 'G'],
+      multimod: ['ctrl+alt+G', 'alt+#']
     }
 
     controller = new Controller(myModel, virtuals)
@@ -168,6 +186,25 @@ describe('controller maps commands to keyboard codes', () => {
 
     keydownPress('g')
     expect(myModel.a).to.equal('keydown multi')
+  })
+
+  it('handles keys with modifiers', () => {
+    keydownAltCtrlPress('+')
+    expect(myModel.a).to.equal('keydown ctrl+alt++')
+  })
+
+  it('handles multiple keys, with modifiers, binded to a single virtual key', () => {
+    keyupPress('w')
+    expect(myModel.a).to.equal('keyup inc')
+
+    keydownAltPress('#')
+    expect(myModel.a).to.equal('keydown multimod')
+
+    keydownPress('w')
+    expect(myModel.a).to.equal('keydown inc')
+
+    keydownAltCtrlPress('G')
+    expect(myModel.a).to.equal('keydown multimod')
   })
 
   it('calls the wildcard handler when any key is pressed', () => {

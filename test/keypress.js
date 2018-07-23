@@ -21,7 +21,20 @@ function keyupShiftPress (key) {
   keyPress(key, 'keyup', { shiftKey: true })
 }
 
+function keydownAltCtrlPress (key) {
+  keyPress(key, 'keydown', {
+    ctrlKey: true,
+    altKey: true
+  })
+}
+
+function keydownAltPress (key) {
+  keyPress(key, 'keydown', { altKey: true })
+}
+
 export {
+  keydownAltCtrlPress,
+  keydownAltPress,
   keyupShiftPress,
   keydownPress,
   keyupPress
