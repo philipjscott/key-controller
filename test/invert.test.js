@@ -47,4 +47,33 @@ describe('invert.js inverts an object\'s keys and values', () => {
       expect(dup).to.equal('3')
     }
   })
+
+  it('destructures array values into keys in inverted object', () => {
+    const obj = {
+      'foo': ['bar', 'baz'],
+      'a': '1',
+      'b': '2'
+    }
+    const inverse = invert(obj)
+
+    expect(inverse).to.deep.equal({
+      'bar': 'foo',
+      'baz': 'foo',
+      '1': 'a',
+      '2': 'b'
+    })
+  })
+
+  it('throws duplicate object when array values appear multiple times', () => {
+    const obj = {
+      'foo': ['bar', 'baz'],
+      'a': ['ayy', 'bar'],
+      'b': '2'
+    }
+    try {
+      invert(obj)
+    } catch (dup) {
+      expect(dup).to.equal('bar')
+    }
+  })
 })
