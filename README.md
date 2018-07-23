@@ -58,7 +58,7 @@ const virtuals = {
       model.y -= 1
     }
   },
-  toggleDancing: {
+  toggleDance: {
     keydown (model) {
       model.isDancing = !model.isDancing
     }
