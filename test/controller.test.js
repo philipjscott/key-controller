@@ -284,6 +284,8 @@ describe('controller maps commands to keyboard codes', () => {
     expect(myModel.a).to.equal('keydown reset')
   })
 
+  // Note: this test actually test bind(); all the work is being done by
+  // removeEvents() and addEvents() - this is acting as a placeholder once a better workaround has been found
   it('bind and unbind the controller', () => {
     controller.unbind()
     removeEvents()
