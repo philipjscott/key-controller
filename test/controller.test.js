@@ -17,7 +17,8 @@ import {
 chai.use(dirtyChai)
 
 let myModel
-let virtuals
+let myModel2
+let generator
 let controls
 let controller
 
@@ -42,55 +43,61 @@ describe('controller maps commands to keyboard codes', () => {
       a: 'init',
       calls: 0
     }
-    virtuals = {
+    myModel2 = {
+      string: ''
+    }
+    generator = (model, model2) => ({
       _: {
-        keydown (model) {
+        keydown () {
           model.calls += 1
         }
       },
       caps: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown caps'
         }
       },
       inc: {
-        keyup (model, e) {
+        keyup (e) {
           if (!e.shiftKey) {
             model.a = 'keyup inc'
           } else {
             model.a = 'keyup inc shift'
           }
         },
-        keydown (model) {
+        keydown () {
           model.a = 'keydown inc'
         }
       },
       dec: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown dec'
         }
       },
       reset: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown reset'
         }
       },
       mod: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown ctrl+alt++'
         }
       },
       multi: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown multi'
         }
       },
       multimod: {
-        keydown (model) {
+        keydown () {
           model.a = 'keydown multimod'
         }
+      },
+      appendLetter () {
+        model2.string += 'a'
       }
-    }
+    })
     controls = {
       inc: 'w',
       dec: 'a',
@@ -98,10 +105,11 @@ describe('controller maps commands to keyboard codes', () => {
       caps: 'A',
       mod: 'ctrl+alt++',
       multi: ['H', 'g', 'G'],
-      multimod: ['ctrl+alt+G', 'alt+#']
+      multimod: ['ctrl+alt+G', 'alt+#'],
+      appendLetter: '='
     }
 
-    controller = new Controller(myModel, virtuals)
+    controller = new Controller(generator, myModel, myModel2)
     controller.register(controls)
 
     documentAddEventSpy = sinon.spy(document, 'addEventListener')
@@ -224,6 +232,14 @@ describe('controller maps commands to keyboard codes', () => {
 
     keydownPress('space')
     expect(myModel.calls).to.equal(5)
+  })
+
+  it('defaults to keydown if no event handlers are given', () => {
+    keydownPress('=')
+    keydownPress('=')
+    keydownPress('=')
+
+    expect(myModel2.string).to.equal('aaa')
   })
 
   it('overwrites old controls when passed new controls', () => {
