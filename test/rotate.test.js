@@ -48,4 +48,50 @@ describe('rotate.js swaps an object\'s inner and outer keys', () => {
       }
     })
   })
+
+  it('creates an inner key if no key exists', () => {
+    const obj = {
+      outerNoInner: 5,
+      outer1: {
+        inner1: 4
+      }
+    }
+    const rotatedObj = rotate(obj, 'dummy')
+
+    expect(rotatedObj).to.deep.equal({
+      dummy: {
+        outerNoInner: 5
+      },
+      inner1: {
+        outer1: 4
+      }
+    })
+  })
+
+  it('works with function values', () => {
+    const fn = () => 5
+
+    const obj = {
+      outerNoInner: 5,
+      outerFn: fn,
+      outer1: {
+        inner1: 4,
+        inner2: 2
+      }
+    }
+    const rotatedObj = rotate(obj, 'dummy')
+
+    expect(rotatedObj).to.deep.equal({
+      dummy: {
+        outerNoInner: 5,
+        outerFn: fn
+      },
+      inner1: {
+        outer1: 4
+      },
+      inner2: {
+        outer1: 2
+      }
+    })
+  })
 })
