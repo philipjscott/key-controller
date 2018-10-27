@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/ScottyFillups/key-controller/badge.svg?branch=master)](https://coveralls.io/github/ScottyFillups/key-controller?branch=master)
 [![install size](https://packagephobia.now.sh/badge?p=key-controller)](https://packagephobia.now.sh/result?p=key-controller)
 
-key-controller is a library that abstracts handling `keydown` and `keyup` events, making it easier to change keyboard controls dynamically.
+key-controller is a library that abstracts handling `keydown` and `keyup` events in the browser, making it easier to change keyboard controls dynamically.
 
 key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for `controller.register(...)`. We recommend using https://keycode.info/ for looking up `.key` property of specific key's event.
 
@@ -13,6 +13,12 @@ key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs
 
 ```
 npm install key-controller --save-dev
+```
+
+If you don't use a module bundler, you can include the minified file:
+
+```html
+<script src="unpkg.com/key-controller/umd/key-controller.min.js" defer></script>
 ```
 
 ## Concepts

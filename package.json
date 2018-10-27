@@ -9,6 +9,7 @@
     "fix": "standard --fix",
     "lint": "standard",
     "test": "standard && nyc ava",
+    "build": "parcel build --global KeyController --out-dir umd --out-file key-controller.min.js index.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "demo": "parcel ./demo/index.html --open",
     "semantic-release": "semantic-release",
