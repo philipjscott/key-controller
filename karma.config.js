@@ -20,9 +20,9 @@ module.exports = function (config) {
     files: ['test/**/*.js'],
     reporters: ['progress', 'coverage'],
     coverageReporter: {
-      /* instrumenterOptions: {
+      instrumenterOptions: {
         istanbul: { noCompact: true }
-      }, */
+      },
       type: 'lcov',
       dir: 'coverage/'
     },
