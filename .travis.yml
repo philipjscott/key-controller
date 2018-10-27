@@ -1,4 +1,8 @@
 language: node_js
+script:
+  - npm run test
+after_script:
+  - npm run coverage
 cache:
   directories:
     - ~/.npm
