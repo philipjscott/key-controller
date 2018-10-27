@@ -1,7 +1,7 @@
 node_modules/
-coverage/
-dist/
+.nyc_output/
 .cache/
+dist/
 *.swo
 *.swp
 *.log

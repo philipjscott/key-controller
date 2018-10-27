@@ -26,7 +26,7 @@ The generator function takes in arguments (models) and returns an object with vi
 ```js
 const gen = (model1, model2) => ({
   jump () {
-    console.log('Jump! Models: ', model1, model2)
+    console.log(`Jump! Models: ${model1}, ${model2}`)
   }
 })
 ```
@@ -73,7 +73,7 @@ const generator = (model) => {
       model.isDancing = false
     },
     keydown () {
-      model.isDancing = !model.isDancing
+      model.isDancing = true
     }
   },
   // the "_" virtual key is special;
