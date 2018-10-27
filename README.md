@@ -1,10 +1,13 @@
 # key-controller
 
-key-controller is a library that abstracts handling `keydown` and `keyup` events, making it easier to change keyboard controls "on the fly".
+[![npm version](https://badge.fury.io/js/key-controller.svg)](https://badge.fury.io/js/key-controller)
+[![Build Status](https://travis-ci.org/ScottyFillups/key-controller.svg?branch=master)](https://travis-ci.org/ScottyFillups/key-controller)
+[![Coverage Status](https://coveralls.io/repos/github/ScottyFillups/key-controller/badge.svg?branch=master)](https://coveralls.io/github/ScottyFillups/key-controller?branch=master)
+[![install size](https://packagephobia.now.sh/badge?p=key-controller)](https://packagephobia.now.sh/result?p=key-controller)
 
-key-controller currently only supports projects that transpile ES6. We plan to make a UMD build if somebody requests it :smiley:
+key-controller is a library that abstracts handling `keydown` and `keyup` events, making it easier to change keyboard controls dynamically.
 
-key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for mapping controls to virtual keys. We recommend using https://keycode.info/ for looking up concretes.
+key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) for `controller.register(...)`. We recommend using https://keycode.info/ for looking up `.key` property of specific key's event.
 
 ## Installation
 
@@ -14,103 +17,164 @@ npm install key-controller --save-dev
 
 ## Concepts
 
-Keyboard controls often map to an abstract action, eg. the `spacebar` key is often the "jump" button. We will call abstract actions "virtual keys", and keyboard controls "concrete keys", or "virtuals" and "concretes" for short.
-
-You need to provide three things to key-controller:
-* A generator function, which takes in models and returns virtuals
-* "Models" that are passed to the generator function
-* A mapping of virtual keys to concrete keys
-
-The generator function takes in arguments (models) and returns an object with virtuals. The key is the virtual key name, and the value is a function to be executed when that virtual key is triggered:
+Keyboard controls usually map to an abstract action, eg. `Spacebar -> Jump`. To make a controller, you pass in generator function and a context:
 
 ```js
-const gen = (model1, model2) => ({
+const generator = ctx => ({
   jump () {
-    console.log(`Jump! Models: ${model1}, ${model2}`)
+    ctx.jump()
   }
 })
+const player = {
+  jump () {
+    console.log('jump!')
+  }
+}
+
+const controller = new Controller(generator, player)
 ```
 
-The generator function is passed to key-controller constructor as the first argument. The remaining arguments are passed to the generator function as models:
+Your generator function will be called with the contexts that were passed to `Controller` and should return a JavaScript object containing abstract actions.
+
+To map keyboard controls to the actions, you call `controller.register(mycontrols)`:
 
 ```js
-const controller = new Controller(gen, 'foo', 'bar')
-
-// jump() will now be called when you press the spacebar
-controller.register({
+const controls = {
   jump: ' '
-})
-```
+}
 
-In the above example, `'Jumps! Models: foo, bar'` will be outputted every time you press the spacebar.
+controller.register(controls)
+
+// Pressing Spacebar will now call player.jump()
+```
 
 ## Usage
 
 ```js
 import Controller from 'key-controller'
 
-const myModel = {
+const billyTheGoblin = {
   x: 0,
-  y: 0,
   isDancing: false
 }
 
-const generator = (model) => {
+const generator = goblin => {
   moveLeft () {
-    model.x -= 1
+    goblin.x -= 1
   },
   moveRight () {
-    model.x += 1
-  },
-  moveUp () {
-    model.y += 1
-  },
-  moveDown () {
-    model.y -= 1
+    goblin.x += 1
   },
   toggleDance: {
     keyup () {
-      model.isDancing = false
+      goblin.isDancing = false
     },
     keydown () {
-      model.isDancing = true
+      goblin.isDancing = true
     }
   },
-  // the "_" virtual key is special;
-  // it's triggered by any keypress and is used primarily for debugging
-  _: { 
-    keydown () {
-      console.log(model)
-    }
-  }
 }
 const controls = {
   moveLeft: ['ArrowLeft', 'a'],
   moveRight: ['ArrowRight', 'd'],
-  moveUp: ['ArrowUp', 'w'],
-  moveDown: ['ArrowDown', 's'],
   toggleDance: 'alt+d'
 }
-const controller = new Controller(generator, myModel)
+const controller = new Controller(generator, billyTheGoblin)
 
-controller.register(controls) // map keyboard controls to "virtual keys"
-
-// controller.register( ... ) can be called with new controls any time;
-// this overwrites the old controls
+controller.register(controls)
 ```
 
-## Testing
+## API
 
-If Headless Chrome complains about no usable sandbox and you're on Linux, run the following (you'll need to be root):
+#### new Controller(generator, [...context])
 
+Creates a "controller", an object that stores a collection of abstract actions to be trigger by the controls in `controller.register(mycontrols)`.
+
+#### generator
+
+Type: `([...Any]) => Object`
+
+A function that takes an arbitrary number of arguments, and returns an object with abstract actions. An action name can map to a function or an object that contains a `keydown` and/or `keyup` function. If the action name maps to a function, **it will be triggered on** `keydown`. 
+
+The functions will always be passed its respective `KeyboardEvent` when the action is triggered. You probably won't need to use it though.
+
+```js
+const generator = (cat, dog) => ({
+  patDog (e) {
+    console.log('Keyboard event:', e)
+    console.log('You\'re patting the dog!')
+    dog.woof()
+  },
+  patCat () {
+    keydown () {
+      console.log('You started patting the cat')
+    },
+    keyup () {
+      console.log('You stopped patting the cat; it\'s now upset :c')
+      cat.ragequit()
+    }
+  }
+})
 ```
-echo 1 > /proc/sys/kernel/unprivileged_userns_clone
+
+There is a special action name, `_`, which is triggered on every keypress (i.e. you don't need to specify it in your `control` object); it's intended for debugging purposes, such as logging the contexts.
+
+#### context
+
+Type: `Any`
+
+An arbitrary number of arguments that will all be passed to the generator function (useful if you want your generator function in a separate file, which doesn't have access to the desired scope.
+
+#### controller.register(controls)
+
+Registers controls to the abstract actions defined in the generator function.
+
+#### controls
+
+Type: `Object`
+
+A mapping of the abstract action names to keyboard controls, e.g.
+
+```js
+const controls = {
+  left: 'a',
+  right: 'd'
+}
 ```
 
-The above command isn't permanent; to make the changes persist, you'll need to modify `sysctl.d`:
+An abstract action can map to multiple controls using arrays:
 
-```
-echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/00-local-userns.conf
+```js
+// Jump when "w" or the Spacebar is pressed
+const controls = {
+  jump: ['w', ' ']
+}
 ```
 
-For more information, see "Enable support to run unprivileged containers" [here](https://wiki.archlinux.org/index.php/Linux_Containers).
+"Modifier keys", ie. `meta`, `ctrl`, `alt` can be prepended using `+` to check whether they're being held down on keypress:
+
+```js
+// Quit when the user press q while holding ctrl
+// Note that the order and case of the modifier keys does not matter, but the "primary key" must be the last character
+const controls = {
+  quit: 'ctrl+q',
+  rageQuit: 'cTlR+aLT+q'
+}
+```
+
+Note that `shift` is NOT supported; instead, just enter the character you want to trigger the event on. For example, rather than doing `shift+w`, do `W`:
+```js
+// 'W' refers to shift+w
+const controls = {
+  jump: 'w',
+  jumpSuperHigh: 'W'
+}
+```
+
+#### controller.unbind()
+
+Unbinds the controller from the DOM. Calls `document.removeEventListener(...)` under the hood.
+
+#### controller.bind()
+
+Binds the controller from the DOM. Calls `document.addEventListener(...)` under the hood.
