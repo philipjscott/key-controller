@@ -1,57 +1,56 @@
-/* global describe, it, KeyboardEvent */
-
 'use strict'
 
+/* global KeyboardEvent */
+
+import test from 'ava'
 import { decorate, desensitize } from '../lib/compound'
-import { expect } from 'chai'
 
-describe('Compound library handles compound keys', () => {
-  describe('decorate decorates KeyboardEvent.key', () => {
-    it('prepends peripheral active keys, in alphabetical order', () => {
-      const event = new KeyboardEvent('keydown', {
-        key: 'A',
-        ctrlKey: true,
-        altKey: true,
-        metaKey: true
-      })
-
-      expect(decorate(event)).to.equal('alt+ctrl+meta+A')
-    })
-
-    it('does not account for the shift key', () => {
-      const event = new KeyboardEvent('keydown', {
-        key: '+',
-        ctrlKey: true,
-        altKey: true,
-        shiftKey: true
-      })
-
-      expect(decorate(event)).to.equal('alt+ctrl++')
-    })
+test('maps keyboard events to keyboard key strings', t => {
+  const event = new KeyboardEvent('keydown', {
+    key: 'A',
+    ctrlKey: true,
+    altKey: true,
+    metaKey: true
   })
 
-  describe('desensitize normalizes case and ordering of compound keys', () => {
-    it('normalizes case, calling toLowerCase()', () => {
-      expect(desensitize('ALT+CTRL+p')).to.equal('alt+ctrl+p')
-      expect(desensitize('Ctrl+Meta+ArrowLeft')).to.equal('ctrl+meta+ArrowLeft')
-    })
+  t.is(decorate(event), 'alt+ctrl+meta+A')
+})
 
-    it('ensures the peripheral keys are in alphabetical order', () => {
-      expect(desensitize('ctrl+meta+alt+p')).to.equal('alt+ctrl+meta+p')
-      expect(desensitize('meta+ctrl+2')).to.equal('ctrl+meta+2')
-    })
-
-    it('does not modify primitive keys', () => {
-      expect(desensitize('A')).to.equal('A')
-      expect(desensitize('Space')).to.equal('Space')
-      expect(desensitize('ArrowLeft')).to.equal('ArrowLeft')
-      expect(desensitize('+')).to.equal('+')
-    })
-
-    it('normalizes both case and ordering simultaneously', () => {
-      expect(desensitize('cTRl+META+alt+p')).to.equal('alt+ctrl+meta+p')
-      expect(desensitize('ctrl+aLT+Space')).to.equal('alt+ctrl+Space')
-      expect(desensitize('meta+Ctrl+2')).to.equal('ctrl+meta+2')
-    })
+test('ignores the shift key', t => {
+  const event = new KeyboardEvent('keydown', {
+    key: 'p',
+    ctrlKey: true,
+    altKey: true,
+    shiftKey: true
   })
+
+  t.is(decorate(event), 'alt+ctrl+p')
+})
+
+test('normalizes case', t => {
+  t.is(desensitize('ALT+CTRL+p'), 'alt+ctrl+p')
+  t.is(desensitize('Ctrl+Meta+ArrowLeft'), 'ctrl+meta+ArrowLeft')
+})
+
+test('ensures the peripheral keys are in alphabetical order', t => {
+  t.is(desensitize('ctrl+meta+alt+p'), 'alt+ctrl+meta+p')
+  t.is(desensitize('meta+ctrl+2'), 'ctrl+meta+2')
+})
+
+test('does not modify primitive keys', t => {
+  t.is(desensitize('A'), 'A')
+  t.is(desensitize('Space'), 'Space')
+  t.is(desensitize('ArrowLeft'), 'ArrowLeft')
+  t.is(desensitize('+'), '+')
+})
+
+test('decorate and desensitize work together', t => {
+  const event = new KeyboardEvent('keydown', {
+    key: '+',
+    ctrlKey: true,
+    altKey: true,
+    shiftKey: true
+  })
+
+  t.is(desensitize(decorate(event)), 'alt+ctrl++')
 })

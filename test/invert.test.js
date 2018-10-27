@@ -1,79 +1,81 @@
-/* global describe, it */
-
 'use strict'
 
+import test from 'ava'
 import invert from '../lib/invert'
-import { expect } from 'chai'
 
-describe('invert.js inverts an object\'s keys and values', () => {
-  it('does not mutate the original object', () => {
-    const obj = {
-      'a': '1',
-      'b': '2',
-      'c': '3'
-    }
+test('does not mutate the original object', t => {
+  const input = {
+    'a': '1',
+    'b': '2',
+    'c': '3'
+  }
 
-    invert(obj)
+  invert(input)
 
-    expect(obj).to.deep.equal({
-      'a': '1',
-      'b': '2',
-      'c': '3'
-    })
+  t.deepEqual(input, {
+    'a': '1',
+    'b': '2',
+    'c': '3'
   })
+})
 
-  it('inverts an object that is a bijection', () => {
-    const obj = {
-      'a': '1',
-      'b': '2',
-      'c': '3'
-    }
-    const inverse = invert(obj)
+test('inverts an object that is a bijection', t => {
+  const input = {
+    'a': '1',
+    'b': '2',
+    'c': '3'
+  }
+  const expected = {
+    '1': 'a',
+    '2': 'b',
+    '3': 'c'
+  }
 
-    for (const prop in obj) {
-      expect(prop).to.equal(inverse[obj[prop]])
-    }
-  })
+  t.deepEqual(invert(input), expected)
+})
 
-  it('throws the duplicate value if the object is not a bijection', () => {
-    const obj = {
-      'a': '1',
-      'b': '3',
-      'c': '3'
-    }
-    try {
-      invert(obj)
-    } catch (dup) {
-      expect(dup).to.equal('3')
-    }
-  })
+test('throws the duplicate value if the inputect is not a bijection', t => {
+  const input = {
+    'a': '1',
+    'b': '3',
+    'c': '3'
+  }
+  try {
+    invert(input)
 
-  it('destructures array values into keys in inverted object', () => {
-    const obj = {
-      'foo': ['bar', 'baz'],
-      'a': '1',
-      'b': '2'
-    }
-    const inverse = invert(obj)
+    t.fail()
+  } catch (dup) {
+    t.is(dup, '3')
+  }
+})
 
-    expect(inverse).to.deep.equal({
-      'bar': 'foo',
-      'baz': 'foo',
-      '1': 'a',
-      '2': 'b'
-    })
-  })
+test('destructures array values into keys in inverted object', t => {
+  const input = {
+    'foo': ['bar', 'baz'],
+    'a': '1',
+    'b': '2'
+  }
+  const expected = {
+    'bar': 'foo',
+    'baz': 'foo',
+    '1': 'a',
+    '2': 'b'
+  }
 
-  it('throws duplicate object when array values appear multiple times', () => {
-    const obj = {
-      'foo': ['bar', 'baz'],
-      'a': ['ayy', 'bar'],
-      'b': '2'
-    }
-    try {
-      invert(obj)
-    } catch (dup) {
-      expect(dup).to.equal('bar')
-    }
-  })
+  t.deepEqual(invert(input), expected)
+})
+
+test('throws duplicate value when array values appear multiple times', t => {
+  const input = {
+    'foo': ['bar', 'baz'],
+    'a': ['ayy', 'bar'],
+    'b': '2'
+  }
+  try {
+    t.log(JSON.stringify(invert(input)))
+
+    t.fail()
+  } catch (dup) {
+    t.is(dup, 'bar')
+  }
 })
