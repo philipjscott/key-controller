@@ -9,7 +9,7 @@
     "fix": "standard --fix",
     "lint": "standard",
     "test": "standard && karma start --single-run --browsers ChromeHeadless karma.config.js",
-    "coverage": "cat coverage/HeadlessChrome\ 0.0.0\ \(Linux\ 0.0.0\)/lcov.info | coveralls",
+    "coverage": "cat coverage/HeadlessChrome\\ 0.0.0\\ \\(Linux\\ 0.0.0\\)/lcov.info | coveralls",
     "demo": "parcel ./demo/index.html --open",
     "semantic-release": "semantic-release",
     "travis-deploy-once": "travis-deploy-once"
