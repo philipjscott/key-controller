@@ -2,6 +2,18 @@
   "name": "key-controller",
   "version": "0.0.0-development",
   "main": "index.js",
+  "description": "A library that abstracts handling keyboard controls in the browser",
+  "keywords": [
+    "keyboard",
+    "key",
+    "controls",
+    "browser",
+    "game",
+    "HTML5",
+    "event",
+    "addEventListener",
+    "KeyboardEvent"
+  ],
   "repository": "git@github.com:ScottyFillups/key-controller.git",
   "author": "Philip Scott <pscott@zeptohost.com>",
   "license": "MIT",
