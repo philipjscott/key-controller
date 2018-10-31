@@ -15,7 +15,7 @@ key-controller uses [KeyboardEvent.key](https://developer.mozilla.org/en-US/docs
 npm install key-controller --save-dev
 ```
 
-If you don't use a module bundler, you can include the minified file:
+If you don't use a module bundler, you can include the minified file which exports the `KeyController` global:
 
 ```html
 <script src="unpkg.com/key-controller/umd/key-controller.min.js" defer></script>
@@ -37,10 +37,10 @@ const player = {
   }
 }
 
-const controller = new Controller(generator, player)
+const controller = new KeyController(generator, player)
 ```
 
-Your generator function will be called with the contexts that were passed to `Controller` and should return a JavaScript object containing abstract actions.
+Your generator function will be called with the contexts that were passed to `KeyController` and should return a JavaScript object containing abstract actions.
 
 To map keyboard controls to the actions, you call `controller.register(mycontrols)`:
 
@@ -57,7 +57,7 @@ controller.register(controls)
 ## Usage
 
 ```js
-import Controller from 'key-controller'
+import KeyController from 'key-controller'
 
 const billyTheGoblin = {
   x: 0,
@@ -85,14 +85,14 @@ const controls = {
   moveRight: ['ArrowRight', 'd'],
   toggleDance: 'alt+d'
 }
-const controller = new Controller(generator, billyTheGoblin)
+const controller = new KeyController(generator, billyTheGoblin)
 
 controller.register(controls)
 ```
 
 ## API
 
-#### new Controller(generator, [...context])
+#### new KeyController(generator, [...context])
 
 Creates a "controller", an object that stores a collection of abstract actions to be trigger by the controls in `controller.register(mycontrols)`.
 
